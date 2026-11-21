@@ -23,10 +23,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var weatherEmoji: TextView
     private lateinit var weatherTemp: TextView
     private lateinit var weatherDesc: TextView
-    private lateinit var weatherCity: TextView
     private lateinit var hourlyContainer: LinearLayout
     private lateinit var settingsBtn: ImageButton
     private lateinit var burnInOverlay: BurnInOverlay
+    private lateinit var secondsDialView: SecondsDialView
+    private lateinit var weatherAnimView: WeatherAnimationView
 
     private val handler = Handler(Looper.getMainLooper())
     private val prefs by lazy { HubPreferences(this) }
@@ -66,10 +67,11 @@ class MainActivity : AppCompatActivity() {
         weatherEmoji = findViewById(R.id.weatherEmoji)
         weatherTemp = findViewById(R.id.weatherTemp)
         weatherDesc = findViewById(R.id.weatherDesc)
-        weatherCity = findViewById(R.id.weatherCity)
         hourlyContainer = findViewById(R.id.hourlyContainer)
         settingsBtn = findViewById(R.id.settingsBtn)
         burnInOverlay = findViewById(R.id.burnInOverlay)
+        secondsDialView = findViewById(R.id.secondsDialView)
+        weatherAnimView = findViewById(R.id.weatherAnimView)
 
         settingsBtn.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
@@ -111,6 +113,10 @@ class MainActivity : AppCompatActivity() {
         timeText.text = timeFmt.format(now.time)
         dateText.text = dateFmt.format(now.time)
 
+        // 60-second radial ticks dial update
+        val sec = now.get(Calendar.SECOND)
+        secondsDialView.setSecond(sec)
+
         val currentMinutes = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
         val sunrise = prefs.getSunriseMinutes()
         val sunset = prefs.getSunsetMinutes()
@@ -126,16 +132,16 @@ class MainActivity : AppCompatActivity() {
         val primary = if (night) Color.parseColor("#E53935") else Color.WHITE
         val secondary = if (night) Color.parseColor("#B71C1C") else Color.parseColor("#CCCCCC")
         val tertiary = if (night) Color.parseColor("#7F0000") else Color.parseColor("#888888")
+        val dialInactive = if (night) Color.parseColor("#330A0A") else Color.parseColor("#222222")
 
         timeText.setTextColor(primary)
         dateText.setTextColor(secondary)
         weatherEmoji.setTextColor(primary)
         weatherTemp.setTextColor(primary)
         weatherDesc.setTextColor(secondary)
-        weatherCity.setTextColor(tertiary)
         settingsBtn.setColorFilter(tertiary)
 
-        // update hourly colors
+        secondsDialView.setDialColors(primary, dialInactive)
         renderHourly(lastHourlyData, night)
     }
 
@@ -171,7 +177,6 @@ class MainActivity : AppCompatActivity() {
             weatherEmoji.text = ""
             weatherTemp.text = "--°"
             weatherDesc.text = "Tap ⚙ to set location"
-            weatherCity.text = ""
             hourlyContainer.removeAllViews()
             return
         }
@@ -186,7 +191,7 @@ class MainActivity : AppCompatActivity() {
                         weatherEmoji.text = weather.emoji
                         weatherTemp.text = "${weather.temperature.toInt()}°"
                         weatherDesc.text = weather.description
-                        weatherCity.text = prefs.getCityName()
+                        weatherAnimView.setWeatherState(weather.weatherCode, weather.isDay, isNightMode)
                         renderHourly(weather.hourly, isNightMode)
                     }
                 }

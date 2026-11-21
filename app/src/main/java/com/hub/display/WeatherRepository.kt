@@ -16,6 +16,8 @@ class WeatherRepository {
         val temperature: Double,
         val description: String,
         val emoji: String,
+        val weatherCode: Int,
+        val isDay: Boolean,
         val humidity: Int,
         val sunriseMinutes: Int,
         val sunsetMinutes: Int,
@@ -23,13 +25,13 @@ class WeatherRepository {
     )
 
     /**
-     * Fetches current weather and 24h hourly forecast from Open-Meteo.
+     * Fetches current weather with accurate day/night recognition + 24h hourly forecast.
      */
     fun getWeather(lat: Double, lon: Double): WeatherData? {
         val urlStr = "https://api.open-meteo.com/v1/forecast?" +
                 "latitude=$lat&longitude=$lon" +
-                "&current=temperature_2m,relative_humidity_2m,weather_code" +
-                "&hourly=temperature_2m,weather_code" +
+                "&current=temperature_2m,relative_humidity_2m,weather_code,is_day" +
+                "&hourly=temperature_2m,weather_code,is_day" +
                 "&forecast_hours=24" +
                 "&daily=sunrise,sunset" +
                 "&timezone=auto&forecast_days=2"
@@ -47,6 +49,7 @@ class WeatherRepository {
             val temp = current.getDouble("temperature_2m")
             val humidity = current.getInt("relative_humidity_2m")
             val weatherCode = current.getInt("weather_code")
+            val isDay = current.optInt("is_day", 1) == 1
 
             val daily = json.getJSONObject("daily")
             val sunrise = daily.getJSONArray("sunrise").getString(0)
@@ -58,6 +61,7 @@ class WeatherRepository {
                 val times = hourlyJson.getJSONArray("time")
                 val temps = hourlyJson.getJSONArray("temperature_2m")
                 val codes = hourlyJson.getJSONArray("weather_code")
+                val isDays = hourlyJson.optJSONArray("is_day")
 
                 val count = minOf(times.length(), 24)
                 for (i in 0 until count) {
@@ -65,14 +69,17 @@ class WeatherRepository {
                     val hourStr = fullTime.substringAfter("T") // "14:00"
                     val t = temps.getDouble(i).toInt()
                     val c = codes.getInt(i)
-                    hourlyList.add(HourlyForecast(hourStr, t, codeToEmoji(c)))
+                    val hDay = isDays?.optInt(i, 1) != 0
+                    hourlyList.add(HourlyForecast(hourStr, t, codeToEmoji(c, hDay)))
                 }
             }
 
             WeatherData(
                 temperature = temp,
                 description = codeToDescription(weatherCode),
-                emoji = codeToEmoji(weatherCode),
+                emoji = codeToEmoji(weatherCode, isDay),
+                weatherCode = weatherCode,
+                isDay = isDay,
                 humidity = humidity,
                 sunriseMinutes = parseTimeToMinutes(sunrise),
                 sunsetMinutes = parseTimeToMinutes(sunset),
@@ -93,9 +100,11 @@ class WeatherRepository {
     }
 
     companion object {
-        fun codeToEmoji(code: Int): String = when (code) {
-            0 -> "☀️"
-            1, 2, 3 -> "⛅"
+        fun codeToEmoji(code: Int, isDay: Boolean = true): String = when (code) {
+            0 -> if (isDay) "☀️" else "🌙"
+            1 -> if (isDay) "🌤️" else "🌑"
+            2 -> if (isDay) "⛅" else "☁️"
+            3 -> "☁️"
             45, 48 -> "🌫️"
             51, 53, 55 -> "🌦️"
             56, 57 -> "🌧️"
@@ -105,11 +114,11 @@ class WeatherRepository {
             80, 81, 82 -> "🌧️"
             85, 86 -> "🌨️"
             95, 96, 99 -> "⛈️"
-            else -> "🌡️"
+            else -> if (isDay) "☀️" else "🌙"
         }
 
         fun codeToDescription(code: Int): String = when (code) {
-            0 -> "Clear sky"
+            0 -> "Clear"
             1 -> "Mainly clear"
             2 -> "Partly cloudy"
             3 -> "Overcast"
