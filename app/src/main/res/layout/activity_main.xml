@@ -19,25 +19,26 @@
             android:orientation="horizontal"
             android:baselineAligned="false">
 
-            <!-- ─── Left: Rectangular Cadre 60 Huge Precision Blocks + Huge Clock ─── -->
+            <!-- ─── Left: Rectangular Cadre 60 Precision Blocks + Auto-fitting Clock ─── -->
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:padding="2dp">
 
-                <!-- 60 Extra Large Hollow/Filled Precision Blocks -->
+                <!-- 60 Responsive Precision Blocks -->
                 <com.hub.display.SecondsDialView
                     android:id="@+id/secondsDialView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
 
-                <!-- Center Clock Text -->
+                <!-- Center Clock Text: Single line guaranteed with auto-sizing! -->
                 <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:gravity="center"
+                    android:paddingStart="22dp"
+                    android:paddingEnd="22dp"
                     android:orientation="vertical">
 
                     <TextView
@@ -46,7 +47,10 @@
                         android:layout_height="wrap_content"
                         android:text="00:00"
                         android:textColor="#FFFFFF"
-                        android:textSize="135sp"
+                        android:textSize="82sp"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:ellipsize="none"
                         android:textStyle="bold"
                         android:fontFamily="sans-serif-medium"
                         android:includeFontPadding="false" />
@@ -56,12 +60,12 @@
             <!-- ─── Center: Slim Seamless Edge-to-Edge 8-Box Calendar Strip ─── -->
             <com.hub.display.CalendarBarView
                 android:id="@+id/calendarBarView"
-                android:layout_width="34dp"
+                android:layout_width="32dp"
                 android:layout_height="match_parent"
-                android:layout_marginStart="2dp"
-                android:layout_marginEnd="2dp" />
+                android:layout_marginStart="1dp"
+                android:layout_marginEnd="1dp" />
 
-            <!-- ─── Right: Weather Particles + Animated Icon + Huge Temp + Min/Max ─── -->
+            <!-- ─── Right: Weather Particles + Animated Icon + Auto-fitting Temp + Min/Max ─── -->
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -80,7 +84,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="4dp">
+                    android:padding="2dp">
 
                     <!-- Min & Max Temperature Tag right above temperature -->
                     <LinearLayout
@@ -96,11 +100,11 @@
                             android:text="▼ 9°   ▲ 16°"
                             android:textColor="#AAAAAA"
                             android:textStyle="bold"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:fontFamily="sans-serif-medium" />
                     </LinearLayout>
 
-                    <!-- Main Icon + Huge Temperature -->
+                    <!-- Main Icon + Temperature matching Clock height -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -110,10 +114,10 @@
                         <!-- Custom Vector Animated Weather Icon -->
                         <com.hub.display.AnimatedWeatherIconView
                             android:id="@+id/animatedWeatherIcon"
-                            android:layout_width="110dp"
-                            android:layout_height="110dp" />
+                            android:layout_width="82dp"
+                            android:layout_height="82dp" />
 
-                        <!-- Huge Temperature Matching Clock Size -->
+                        <!-- Temperature Matching Clock Single Line Size -->
                         <TextView
                             android:id="@+id/weatherTemp"
                             android:layout_width="wrap_content"
@@ -121,7 +125,9 @@
                             android:layout_marginStart="4dp"
                             android:text="--°"
                             android:textColor="#FFFFFF"
-                            android:textSize="135sp"
+                            android:textSize="82sp"
+                            android:maxLines="1"
+                            android:singleLine="true"
                             android:textStyle="bold"
                             android:fontFamily="sans-serif-medium"
                             android:includeFontPadding="false" />
@@ -141,32 +147,32 @@
                             android:text=""
                             android:textColor="#CCCCCC"
                             android:textStyle="bold"
-                            android:textSize="20sp" />
+                            android:textSize="17sp" />
 
                         <!-- 10 Droplets Scale for Rain % -->
                         <LinearLayout
                             android:id="@+id/rainDropletsContainer"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
+                            android:layout_marginStart="10dp"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
                             android:visibility="gone">
 
                             <com.hub.display.RainChanceDropletsView
                                 android:id="@+id/rainDropletsView"
-                                android:layout_width="85dp"
-                                android:layout_height="18dp" />
+                                android:layout_width="75dp"
+                                android:layout_height="16dp" />
 
                             <TextView
                                 android:id="@+id/currentRainProbText"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="6dp"
+                                android:layout_marginStart="4dp"
                                 android:text="30%"
                                 android:textColor="#29B6F6"
                                 android:textStyle="bold"
-                                android:textSize="14sp" />
+                                android:textSize="13sp" />
                         </LinearLayout>
 
                     </LinearLayout>
@@ -185,7 +191,7 @@
         <!-- ─── Dynamic Bottom Bar (Alternates every 1 min: 24h Hourly <-> Live News Ticker) ─── -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="52dp"
+            android:layout_height="48dp"
             android:background="#070707">
 
             <!-- View 1: 24h Hourly Forecast -->
@@ -202,8 +208,8 @@
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp" />
+                    android:paddingStart="6dp"
+                    android:paddingEnd="6dp" />
             </HorizontalScrollView>
 
             <!-- View 2: Live Marquee News Ticker Bar (Feels like, Wind, Humidity, UV...) -->
@@ -219,12 +225,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
                     android:singleLine="true"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
-                    android:textSize="14sp"
+                    android:textSize="13sp"
                     android:fontFamily="sans-serif-medium"
                     android:text="FEELS LIKE: --°   •   WIND: -- km/h   •   HUMIDITY: --%   •   UV INDEX: --   •   RAIN CHANCE: --%" />
             </HorizontalScrollView>
@@ -244,10 +250,10 @@
     <!-- ═══ Settings Button ═══ -->
     <ImageButton
         android:id="@+id/settingsBtn"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
         android:layout_gravity="top|end"
-        android:layout_margin="8dp"
+        android:layout_margin="6dp"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/settings"
         android:src="@drawable/ic_settings"

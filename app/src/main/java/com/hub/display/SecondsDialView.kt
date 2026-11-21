@@ -9,14 +9,10 @@ import android.util.AttributeSet
 import android.view.View
 
 /**
- * 60 Extra Large Precision Blocks encircling the clock:
- * - Huge & Super Visible from far away:
- *   - Length: 36dp
- *   - Thickness: 18dp
- *   - Stroke width: 3.5dp
- * - Start at exact Top-Center (12 o'clock, tick index 0)
- * - INACTIVE: Bold hollow outline rectangle with rounded corners
- * - ACTIVE: Solid luminous filled rectangle
+ * 60 Precision Segment Blocks encircling the clock:
+ * Dynamically scales its dimensions to fit any screen size (from 5.0" Galaxy J5 to large A21s):
+ * - Margin & dimensions computed from width & height.
+ * - Single-line text safe area inside.
  */
 class SecondsDialView @JvmOverloads constructor(
     context: Context,
@@ -34,7 +30,7 @@ class SecondsDialView @JvmOverloads constructor(
 
     private val strokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeWidth = 3.5f
+        strokeWidth = 2.5f
     }
 
     fun setSecond(second: Int) {
@@ -56,16 +52,16 @@ class SecondsDialView @JvmOverloads constructor(
         val h = height.toFloat()
         if (w == 0f || h == 0f) return
 
-        val margin = 12f
+        val margin = 8f
         val left = margin
         val top = margin
         val right = w - margin
         val bottom = h - margin
 
-        // Extra large dimensions
-        val segLength = 36f
-        val segThick = 18f
-        val corner = 4f
+        // Dynamic responsive segment size based on canvas width
+        val segLength = (w / 16f) * 0.72f
+        val segThick = 10f
+        val corner = 2.5f
 
         fillPaint.color = activeColor
         strokePaint.color = inactiveOutlineColor
