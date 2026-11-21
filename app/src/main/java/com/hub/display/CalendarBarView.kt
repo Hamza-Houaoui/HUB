@@ -10,10 +10,13 @@ import android.view.View
 import java.util.Calendar
 
 /**
- * Vertical center divider with 8 boxes:
- * - Box 0 (Top): Month number (e.g. "11" for November) + Day number (e.g. "21")
- * - Box 1..7: Days of the week (MON, TUE, WED, THU, FRI, SAT, SUN)
- * The current day box lights up with bold highlight!
+ * Modern Slim Edge-to-Edge Calendar Divider:
+ * - Extends continuously from very top edge (0px) to bottom divider (0px)
+ * - Sleek minimal width (36dp)
+ * - 8 micro-cards:
+ *   - Box 0: Compact Date/Month ("21/11")
+ *   - Boxes 1..7: "M", "T", "W", "T", "F", "S", "S" (or "MO", "TU"..)
+ * - Highlighted day lights up with solid background card
  */
 class CalendarBarView @JvmOverloads constructor(
     context: Context,
@@ -21,15 +24,15 @@ class CalendarBarView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    private val days = arrayOf("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN")
-    private var currentDayIndex = 0 // 0 = MON ... 6 = SUN
-    private var monthNumberStr = "01"
-    private var dayNumberStr = "01"
+    private val days = arrayOf("MO", "TU", "WE", "TH", "FR", "SA", "SU")
+    private var currentDayIndex = 0
+    private var monthStr = "11"
+    private var dayStr = "21"
     private var isNightMode = false
 
-    private val boxPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val boxBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeWidth = 2f
+        strokeWidth = 1.2f
     }
 
     private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -44,12 +47,10 @@ class CalendarBarView @JvmOverloads constructor(
     fun updateDate(cal: Calendar, night: Boolean) {
         isNightMode = night
 
-        // Month is 0-indexed in Calendar
         val month = cal.get(Calendar.MONTH) + 1
-        monthNumberStr = String.format("%02d", month)
-        dayNumberStr = String.format("%02d", cal.get(Calendar.DAY_OF_MONTH))
+        monthStr = String.format("%02d", month)
+        dayStr = String.format("%02d", cal.get(Calendar.DAY_OF_MONTH))
 
-        // DAY_OF_WEEK: Sunday = 1, Monday = 2, Tuesday = 3 ...
         val dow = cal.get(Calendar.DAY_OF_WEEK)
         currentDayIndex = when (dow) {
             Calendar.MONDAY -> 0
@@ -70,37 +71,36 @@ class CalendarBarView @JvmOverloads constructor(
         val h = height.toFloat()
         if (w == 0f || h == 0f) return
 
-        val paddingV = 16f
-        val paddingH = 6f
-        val totalAvailableH = h - (paddingV * 2)
-        val boxH = totalAvailableH / 8f
-        val boxW = w - (paddingH * 2)
+        val sidePadding = 4f
+        val boxW = w - (sidePadding * 2)
+        val gap = 3f
+        val totalGaps = 7 * gap
+        val boxH = (h - totalGaps) / 8f
+        val corner = 5f
 
         val activeColor = if (isNightMode) Color.parseColor("#E53935") else Color.WHITE
-        val inactiveBorder = if (isNightMode) Color.parseColor("#330A0A") else Color.parseColor("#222222")
-        val inactiveText = if (isNightMode) Color.parseColor("#661111") else Color.parseColor("#555555")
+        val inactiveBorder = if (isNightMode) Color.parseColor("#2A0808") else Color.parseColor("#1C1C1C")
+        val inactiveText = if (isNightMode) Color.parseColor("#661515") else Color.parseColor("#555555")
 
         for (i in 0 until 8) {
-            val top = paddingV + (i * boxH) + 2f
-            val bottom = top + boxH - 4f
-            val left = paddingH
+            val top = i * (boxH + gap)
+            val bottom = top + boxH
+            val left = sidePadding
             val right = left + boxW
-
             val rect = RectF(left, top, right, bottom)
-            val corner = 8f
 
             if (i == 0) {
-                // Top box: Month number / Day number
-                fillPaint.color = if (isNightMode) Color.parseColor("#441111") else Color.parseColor("#222222")
+                // Top Date Box (Month / Day)
+                fillPaint.color = if (isNightMode) Color.parseColor("#380C0C") else Color.parseColor("#181818")
                 canvas.drawRoundRect(rect, corner, corner, fillPaint)
 
-                boxPaint.color = activeColor
-                canvas.drawRoundRect(rect, corner, corner, boxPaint)
+                boxBorderPaint.color = activeColor
+                canvas.drawRoundRect(rect, corner, corner, boxBorderPaint)
 
                 textPaint.color = activeColor
-                textPaint.textSize = boxW * 0.28f
+                textPaint.textSize = boxW * 0.32f
                 val cy = (top + bottom) / 2f
-                val text = "$dayNumberStr/$monthNumberStr"
+                val text = "$dayStr/$monthStr"
                 canvas.drawText(text, rect.centerX(), cy + (textPaint.textSize / 3f), textPaint)
             } else {
                 val dayIdx = i - 1
@@ -111,13 +111,13 @@ class CalendarBarView @JvmOverloads constructor(
                     canvas.drawRoundRect(rect, corner, corner, fillPaint)
 
                     textPaint.color = Color.BLACK
-                    textPaint.textSize = boxW * 0.32f
+                    textPaint.textSize = boxW * 0.38f
                 } else {
-                    boxPaint.color = inactiveBorder
-                    canvas.drawRoundRect(rect, corner, corner, boxPaint)
+                    boxBorderPaint.color = inactiveBorder
+                    canvas.drawRoundRect(rect, corner, corner, boxBorderPaint)
 
                     textPaint.color = inactiveText
-                    textPaint.textSize = boxW * 0.26f
+                    textPaint.textSize = boxW * 0.32f
                 }
 
                 val dayName = days[dayIdx]

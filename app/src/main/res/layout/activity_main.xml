@@ -5,13 +5,13 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- ═══ Main Content: Upper Area + Bottom 24h Bar ═══ -->
+    <!-- ═══ Main Full Screen Vertical Flow ═══ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Upper Area: Split Screen (Clock | Calendar Divider | Weather) -->
+        <!-- Upper Area: Split Screen (Clock | Slim Calendar Divider | Weather) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -19,14 +19,14 @@
             android:orientation="horizontal"
             android:baselineAligned="false">
 
-            <!-- ─── Left: Rectangular Seconds Cadre + Huge Bold Clock ─── -->
+            <!-- ─── Left: Rectangular Cadre 60 Precision Blocks + Huge Clock ─── -->
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:padding="6dp">
+                android:padding="4dp">
 
-                <!-- 60 Thick Rectangular Tick Marks encircling left half -->
+                <!-- 60 Thick Hollow/Filled Precision Blocks Starting Top-Center -->
                 <com.hub.display.SecondsDialView
                     android:id="@+id/secondsDialView"
                     android:layout_width="match_parent"
@@ -53,13 +53,13 @@
                 </LinearLayout>
             </FrameLayout>
 
-            <!-- ─── Center: 8-Box Calendar Strip (Month/Day + 7 Days) ─── -->
+            <!-- ─── Center: Slim Seamless Edge-to-Edge 8-Box Calendar Strip ─── -->
             <com.hub.display.CalendarBarView
                 android:id="@+id/calendarBarView"
-                android:layout_width="52dp"
+                android:layout_width="34dp"
                 android:layout_height="match_parent"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp" />
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp" />
 
             <!-- ─── Right: Weather Particles + Animated Icon + Huge Temp ─── -->
             <FrameLayout
@@ -80,7 +80,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="8dp">
+                    android:padding="6dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -91,15 +91,15 @@
                         <!-- Animated Weather Icon -->
                         <com.hub.display.AnimatedWeatherIconView
                             android:id="@+id/animatedWeatherIcon"
-                            android:layout_width="110dp"
-                            android:layout_height="110dp" />
+                            android:layout_width="105dp"
+                            android:layout_height="105dp" />
 
                         <!-- Huge Temperature Matching Clock Size -->
                         <TextView
                             android:id="@+id/weatherTemp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
+                            android:layout_marginStart="6dp"
                             android:text="--°"
                             android:textColor="#FFFFFF"
                             android:textSize="135sp"
@@ -121,18 +121,18 @@
                             android:text=""
                             android:textColor="#CCCCCC"
                             android:textStyle="bold"
-                            android:textSize="22sp" />
+                            android:textSize="20sp" />
 
                         <!-- Main Current Rain Chance % -->
                         <TextView
                             android:id="@+id/currentRainProb"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
+                            android:layout_marginStart="12dp"
                             android:text=""
                             android:textColor="#4FC3F7"
                             android:textStyle="bold"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:visibility="gone" />
                     </LinearLayout>
 
@@ -141,19 +141,19 @@
 
         </LinearLayout>
 
-        <!-- ─── Divider before Bottom Bar ─── -->
+        <!-- ─── Sleek Hairline Divider ─── -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#1E1E1E" />
+            android:background="#161616" />
 
-        <!-- ─── Bottom 24h Hourly Forecast Bar (Taller 86dp, Full Content Visible) ─── -->
+        <!-- ─── Compact Sleek 24h Hourly Forecast Bar (54dp only, Clean & Sharp) ─── -->
         <HorizontalScrollView
             android:layout_width="match_parent"
-            android:layout_height="86dp"
+            android:layout_height="54dp"
             android:scrollbars="none"
             android:overScrollMode="never"
-            android:background="#0A0A0A">
+            android:background="#070707">
 
             <LinearLayout
                 android:id="@+id/hourlyContainer"
@@ -161,8 +161,8 @@
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp" />
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp" />
         </HorizontalScrollView>
 
     </LinearLayout>
@@ -178,13 +178,13 @@
     <!-- ═══ Settings Button ═══ -->
     <ImageButton
         android:id="@+id/settingsBtn"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_gravity="top|end"
-        android:layout_margin="10dp"
+        android:layout_margin="8dp"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/settings"
         android:src="@drawable/ic_settings"
-        android:alpha="0.4" />
+        android:alpha="0.35" />
 
 </FrameLayout>
