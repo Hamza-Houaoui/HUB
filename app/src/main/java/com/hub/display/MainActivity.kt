@@ -5,9 +5,11 @@ import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
@@ -22,16 +24,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var weatherTemp: TextView
     private lateinit var weatherDesc: TextView
     private lateinit var weatherCity: TextView
+    private lateinit var hourlyContainer: LinearLayout
     private lateinit var settingsBtn: ImageButton
     private lateinit var burnInOverlay: BurnInOverlay
 
     private val handler = Handler(Looper.getMainLooper())
     private val prefs by lazy { HubPreferences(this) }
     private var isNightMode = false
+    private var lastHourlyData: List<WeatherRepository.HourlyForecast> = emptyList()
 
-    // ── Periodic runnables ──────────────────────────────────────
-
-    /** Update clock every second */
     private val clockRunnable = object : Runnable {
         override fun run() {
             updateClock()
@@ -39,7 +40,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Flip burn-in checkerboard every 5 seconds */
     private val burnInRunnable = object : Runnable {
         override fun run() {
             burnInOverlay.flipPattern()
@@ -47,7 +47,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Refresh weather every 10 minutes */
     private val weatherRunnable = object : Runnable {
         override fun run() {
             fetchWeather()
@@ -55,24 +54,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ── Lifecycle ───────────────────────────────────────────────
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Keep screen on forever
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-        // Fullscreen immersive
-        @Suppress("DEPRECATION")
-        window.decorView.systemUiVisibility = (
-                View.SYSTEM_UI_FLAG_FULLSCREEN
-                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                        or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                )
+        hideSystemUI()
 
         setContentView(R.layout.activity_main)
 
@@ -82,6 +67,7 @@ class MainActivity : AppCompatActivity() {
         weatherTemp = findViewById(R.id.weatherTemp)
         weatherDesc = findViewById(R.id.weatherDesc)
         weatherCity = findViewById(R.id.weatherCity)
+        hourlyContainer = findViewById(R.id.hourlyContainer)
         settingsBtn = findViewById(R.id.settingsBtn)
         burnInOverlay = findViewById(R.id.burnInOverlay)
 
@@ -92,12 +78,20 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Restart all periodic tasks
         handler.post(clockRunnable)
         handler.post(burnInRunnable)
         handler.post(weatherRunnable)
+        hideSystemUI()
+    }
 
-        // Re-enter immersive mode
+    override fun onPause() {
+        super.onPause()
+        handler.removeCallbacks(clockRunnable)
+        handler.removeCallbacks(burnInRunnable)
+        handler.removeCallbacks(weatherRunnable)
+    }
+
+    private fun hideSystemUI() {
         @Suppress("DEPRECATION")
         window.decorView.systemUiVisibility = (
                 View.SYSTEM_UI_FLAG_FULLSCREEN
@@ -109,15 +103,6 @@ class MainActivity : AppCompatActivity() {
                 )
     }
 
-    override fun onPause() {
-        super.onPause()
-        handler.removeCallbacks(clockRunnable)
-        handler.removeCallbacks(burnInRunnable)
-        handler.removeCallbacks(weatherRunnable)
-    }
-
-    // ── Clock ───────────────────────────────────────────────────
-
     private fun updateClock() {
         val now = Calendar.getInstance()
         val timeFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -126,7 +111,6 @@ class MainActivity : AppCompatActivity() {
         timeText.text = timeFmt.format(now.time)
         dateText.text = dateFmt.format(now.time)
 
-        // Night-mode check using stored sunrise/sunset
         val currentMinutes = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
         val sunrise = prefs.getSunriseMinutes()
         val sunset = prefs.getSunsetMinutes()
@@ -138,33 +122,46 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ── Night / Day mode ────────────────────────────────────────
-
     private fun applyNightMode(night: Boolean) {
-        if (night) {
-            val primary = Color.parseColor("#CC2200")
-            val secondary = Color.parseColor("#882200")
-            val tertiary = Color.parseColor("#661100")
+        val primary = if (night) Color.parseColor("#E53935") else Color.WHITE
+        val secondary = if (night) Color.parseColor("#B71C1C") else Color.parseColor("#CCCCCC")
+        val tertiary = if (night) Color.parseColor("#7F0000") else Color.parseColor("#888888")
 
-            timeText.setTextColor(primary)
-            dateText.setTextColor(secondary)
-            weatherEmoji.setTextColor(primary)
-            weatherTemp.setTextColor(primary)
-            weatherDesc.setTextColor(secondary)
-            weatherCity.setTextColor(tertiary)
-            settingsBtn.setColorFilter(tertiary)
-        } else {
-            timeText.setTextColor(Color.WHITE)
-            dateText.setTextColor(Color.parseColor("#BBBBBB"))
-            weatherEmoji.setTextColor(Color.WHITE)
-            weatherTemp.setTextColor(Color.WHITE)
-            weatherDesc.setTextColor(Color.parseColor("#BBBBBB"))
-            weatherCity.setTextColor(Color.parseColor("#888888"))
-            settingsBtn.setColorFilter(Color.parseColor("#888888"))
-        }
+        timeText.setTextColor(primary)
+        dateText.setTextColor(secondary)
+        weatherEmoji.setTextColor(primary)
+        weatherTemp.setTextColor(primary)
+        weatherDesc.setTextColor(secondary)
+        weatherCity.setTextColor(tertiary)
+        settingsBtn.setColorFilter(tertiary)
+
+        // update hourly colors
+        renderHourly(lastHourlyData, night)
     }
 
-    // ── Weather ─────────────────────────────────────────────────
+    private fun renderHourly(hourlyList: List<WeatherRepository.HourlyForecast>, night: Boolean) {
+        lastHourlyData = hourlyList
+        hourlyContainer.removeAllViews()
+        val inflater = LayoutInflater.from(this)
+
+        val tempColor = if (night) Color.parseColor("#E53935") else Color.WHITE
+        val timeColor = if (night) Color.parseColor("#B71C1C") else Color.parseColor("#AAAAAA")
+
+        for (item in hourlyList) {
+            val view = inflater.inflate(R.layout.item_hourly_forecast, hourlyContainer, false)
+            val tTime = view.findViewById<TextView>(R.id.hourlyTime)
+            val tEmoji = view.findViewById<TextView>(R.id.hourlyEmoji)
+            val tTemp = view.findViewById<TextView>(R.id.hourlyTemp)
+
+            tTime.text = item.time
+            tTime.setTextColor(timeColor)
+            tEmoji.text = item.emoji
+            tTemp.text = "${item.temp}°"
+            tTemp.setTextColor(tempColor)
+
+            hourlyContainer.addView(view)
+        }
+    }
 
     private fun fetchWeather() {
         val lat = prefs.getLatitude()
@@ -175,6 +172,7 @@ class MainActivity : AppCompatActivity() {
             weatherTemp.text = "--°"
             weatherDesc.text = "Tap ⚙ to set location"
             weatherCity.text = ""
+            hourlyContainer.removeAllViews()
             return
         }
 
@@ -182,7 +180,6 @@ class MainActivity : AppCompatActivity() {
             try {
                 val weather = WeatherRepository().getWeather(lat, lon)
                 if (weather != null) {
-                    // Persist sunrise/sunset for night-mode
                     prefs.saveSunTimes(weather.sunriseMinutes, weather.sunsetMinutes)
 
                     handler.post {
@@ -190,6 +187,7 @@ class MainActivity : AppCompatActivity() {
                         weatherTemp.text = "${weather.temperature.toInt()}°"
                         weatherDesc.text = weather.description
                         weatherCity.text = prefs.getCityName()
+                        renderHourly(weather.hourly, isNightMode)
                     }
                 }
             } catch (e: Exception) {

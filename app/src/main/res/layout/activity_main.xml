@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- ═══ Content: Clock | Weather ═══ -->
+    <!-- ═══ Split Screen Layout ═══ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -13,7 +13,7 @@
         android:weightSum="2"
         android:baselineAligned="false">
 
-        <!-- ─── Left half: Clock ─── -->
+        <!-- ─── Left: Large Bold Clock ─── -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -26,75 +26,107 @@
                 android:id="@+id/timeText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-thin"
                 android:text="00:00"
                 android:textColor="#FFFFFF"
-                android:textSize="96sp"
+                android:textSize="120sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
                 android:includeFontPadding="false" />
 
             <TextView
                 android:id="@+id/dateText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="6dp"
                 android:text=""
-                android:textColor="#BBBBBB"
-                android:textSize="18sp" />
+                android:textColor="#CCCCCC"
+                android:textStyle="bold"
+                android:textSize="22sp" />
         </LinearLayout>
 
-        <!-- ─── Divider ─── -->
+        <!-- ─── Center Divider ─── -->
         <View
             android:layout_width="1dp"
             android:layout_height="match_parent"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="32dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
             android:background="#222222" />
 
-        <!-- ─── Right half: Weather ─── -->
+        <!-- ─── Right: Bold Weather + 24h Hourly Forecast ─── -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
 
-            <TextView
-                android:id="@+id/weatherEmoji"
+            <!-- Main Current Weather -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="48sp" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/weatherTemp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-light"
-                android:text="--°"
-                android:textColor="#FFFFFF"
-                android:textSize="64sp"
-                android:includeFontPadding="false" />
+                <TextView
+                    android:id="@+id/weatherEmoji"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="64sp" />
+
+                <TextView
+                    android:id="@+id/weatherTemp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:text="--°"
+                    android:textColor="#FFFFFF"
+                    android:textSize="84sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    android:includeFontPadding="false" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/weatherDesc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="2dp"
                 android:text=""
-                android:textColor="#BBBBBB"
+                android:textColor="#CCCCCC"
+                android:textStyle="bold"
                 android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/weatherCity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 android:textColor="#888888"
-                android:textSize="14sp" />
+                android:textSize="13sp" />
+
+            <!-- 24h Forecast Horizontal List -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:scrollbars="none"
+                android:overScrollMode="never">
+
+                <LinearLayout
+                    android:id="@+id/hourlyContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
         </LinearLayout>
     </LinearLayout>
 
-    <!-- ═══ Burn-in protection overlay ═══ -->
+    <!-- ═══ Burn-in Shield Overlay ═══ -->
     <com.hub.display.BurnInOverlay
         android:id="@+id/burnInOverlay"
         android:layout_width="match_parent"
@@ -102,16 +134,16 @@
         android:clickable="false"
         android:focusable="false" />
 
-    <!-- ═══ Settings button (top of z-order) ═══ -->
+    <!-- ═══ Settings Button ═══ -->
     <ImageButton
         android:id="@+id/settingsBtn"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
+        android:layout_margin="12dp"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/settings"
         android:src="@drawable/ic_settings"
-        android:alpha="0.6" />
+        android:alpha="0.5" />
 
 </FrameLayout>
