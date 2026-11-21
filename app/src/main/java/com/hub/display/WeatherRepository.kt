@@ -9,7 +9,8 @@ class WeatherRepository {
     data class HourlyForecast(
         val time: String, // e.g. "02:00"
         val temp: Int,
-        val emoji: String
+        val emoji: String,
+        val precipitationProb: Int // Chance of rain %
     )
 
     data class WeatherData(
@@ -19,19 +20,20 @@ class WeatherRepository {
         val weatherCode: Int,
         val isDay: Boolean,
         val humidity: Int,
+        val precipitationProb: Int,
         val sunriseMinutes: Int,
         val sunsetMinutes: Int,
         val hourly: List<HourlyForecast>
     )
 
     /**
-     * Fetches current weather with accurate day/night recognition + 24h hourly forecast.
+     * Fetches weather data including precipitation probability % and hourly forecast.
      */
     fun getWeather(lat: Double, lon: Double): WeatherData? {
         val urlStr = "https://api.open-meteo.com/v1/forecast?" +
                 "latitude=$lat&longitude=$lon" +
-                "&current=temperature_2m,relative_humidity_2m,weather_code,is_day" +
-                "&hourly=temperature_2m,weather_code,is_day" +
+                "&current=temperature_2m,relative_humidity_2m,weather_code,is_day,precipitation_probability" +
+                "&hourly=temperature_2m,weather_code,is_day,precipitation_probability" +
                 "&forecast_hours=24" +
                 "&daily=sunrise,sunset" +
                 "&timezone=auto&forecast_days=2"
@@ -50,6 +52,7 @@ class WeatherRepository {
             val humidity = current.getInt("relative_humidity_2m")
             val weatherCode = current.getInt("weather_code")
             val isDay = current.optInt("is_day", 1) == 1
+            val currentPrecip = current.optInt("precipitation_probability", 0)
 
             val daily = json.getJSONObject("daily")
             val sunrise = daily.getJSONArray("sunrise").getString(0)
@@ -62,6 +65,7 @@ class WeatherRepository {
                 val temps = hourlyJson.getJSONArray("temperature_2m")
                 val codes = hourlyJson.getJSONArray("weather_code")
                 val isDays = hourlyJson.optJSONArray("is_day")
+                val precips = hourlyJson.optJSONArray("precipitation_probability")
 
                 val count = minOf(times.length(), 24)
                 for (i in 0 until count) {
@@ -70,7 +74,8 @@ class WeatherRepository {
                     val t = temps.getDouble(i).toInt()
                     val c = codes.getInt(i)
                     val hDay = isDays?.optInt(i, 1) != 0
-                    hourlyList.add(HourlyForecast(hourStr, t, codeToEmoji(c, hDay)))
+                    val pProb = precips?.optInt(i, 0) ?: 0
+                    hourlyList.add(HourlyForecast(hourStr, t, codeToEmoji(c, hDay), pProb))
                 }
             }
 
@@ -81,6 +86,7 @@ class WeatherRepository {
                 weatherCode = weatherCode,
                 isDay = isDay,
                 humidity = humidity,
+                precipitationProb = currentPrecip,
                 sunriseMinutes = parseTimeToMinutes(sunrise),
                 sunsetMinutes = parseTimeToMinutes(sunset),
                 hourly = hourlyList

@@ -19,15 +19,16 @@ import java.util.Locale
 class MainActivity : AppCompatActivity() {
 
     private lateinit var timeText: TextView
-    private lateinit var dateText: TextView
-    private lateinit var weatherEmoji: TextView
     private lateinit var weatherTemp: TextView
     private lateinit var weatherDesc: TextView
+    private lateinit var currentRainProb: TextView
     private lateinit var hourlyContainer: LinearLayout
     private lateinit var settingsBtn: ImageButton
     private lateinit var burnInOverlay: BurnInOverlay
     private lateinit var secondsDialView: SecondsDialView
+    private lateinit var calendarBarView: CalendarBarView
     private lateinit var weatherAnimView: WeatherAnimationView
+    private lateinit var animatedWeatherIcon: AnimatedWeatherIconView
 
     private val handler = Handler(Looper.getMainLooper())
     private val prefs by lazy { HubPreferences(this) }
@@ -63,15 +64,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         timeText = findViewById(R.id.timeText)
-        dateText = findViewById(R.id.dateText)
-        weatherEmoji = findViewById(R.id.weatherEmoji)
         weatherTemp = findViewById(R.id.weatherTemp)
         weatherDesc = findViewById(R.id.weatherDesc)
+        currentRainProb = findViewById(R.id.currentRainProb)
         hourlyContainer = findViewById(R.id.hourlyContainer)
         settingsBtn = findViewById(R.id.settingsBtn)
         burnInOverlay = findViewById(R.id.burnInOverlay)
         secondsDialView = findViewById(R.id.secondsDialView)
+        calendarBarView = findViewById(R.id.calendarBarView)
         weatherAnimView = findViewById(R.id.weatherAnimView)
+        animatedWeatherIcon = findViewById(R.id.animatedWeatherIcon)
 
         settingsBtn.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
@@ -108,14 +110,15 @@ class MainActivity : AppCompatActivity() {
     private fun updateClock() {
         val now = Calendar.getInstance()
         val timeFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
-        val dateFmt = SimpleDateFormat("EEEE, dd MMM", Locale.getDefault())
 
         timeText.text = timeFmt.format(now.time)
-        dateText.text = dateFmt.format(now.time)
 
-        // 60-second radial ticks dial update
+        // Seconds rectangular frame update
         val sec = now.get(Calendar.SECOND)
         secondsDialView.setSecond(sec)
+
+        // Center 8-Box Calendar update
+        calendarBarView.updateDate(now, isNightMode)
 
         val currentMinutes = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
         val sunrise = prefs.getSunriseMinutes()
@@ -135,13 +138,13 @@ class MainActivity : AppCompatActivity() {
         val dialInactive = if (night) Color.parseColor("#330A0A") else Color.parseColor("#222222")
 
         timeText.setTextColor(primary)
-        dateText.setTextColor(secondary)
-        weatherEmoji.setTextColor(primary)
         weatherTemp.setTextColor(primary)
         weatherDesc.setTextColor(secondary)
+        currentRainProb.setTextColor(if (night) Color.parseColor("#EF5350") else Color.parseColor("#4FC3F7"))
         settingsBtn.setColorFilter(tertiary)
 
         secondsDialView.setDialColors(primary, dialInactive)
+        calendarBarView.updateDate(Calendar.getInstance(), night)
         renderHourly(lastHourlyData, night)
     }
 
@@ -152,18 +155,28 @@ class MainActivity : AppCompatActivity() {
 
         val tempColor = if (night) Color.parseColor("#E53935") else Color.WHITE
         val timeColor = if (night) Color.parseColor("#B71C1C") else Color.parseColor("#AAAAAA")
+        val rainColor = if (night) Color.parseColor("#EF5350") else Color.parseColor("#4FC3F7")
 
         for (item in hourlyList) {
             val view = inflater.inflate(R.layout.item_hourly_forecast, hourlyContainer, false)
             val tTime = view.findViewById<TextView>(R.id.hourlyTime)
             val tEmoji = view.findViewById<TextView>(R.id.hourlyEmoji)
             val tTemp = view.findViewById<TextView>(R.id.hourlyTemp)
+            val tRain = view.findViewById<TextView>(R.id.hourlyRainProb)
 
             tTime.text = item.time
             tTime.setTextColor(timeColor)
             tEmoji.text = item.emoji
             tTemp.text = "${item.temp}°"
             tTemp.setTextColor(tempColor)
+
+            if (item.precipitationProb > 0) {
+                tRain.visibility = View.VISIBLE
+                tRain.text = "💧${item.precipitationProb}%"
+                tRain.setTextColor(rainColor)
+            } else {
+                tRain.visibility = View.GONE
+            }
 
             hourlyContainer.addView(view)
         }
@@ -174,9 +187,9 @@ class MainActivity : AppCompatActivity() {
         val lon = prefs.getLongitude()
 
         if (lat == 0.0 && lon == 0.0) {
-            weatherEmoji.text = ""
             weatherTemp.text = "--°"
             weatherDesc.text = "Tap ⚙ to set location"
+            currentRainProb.visibility = View.GONE
             hourlyContainer.removeAllViews()
             return
         }
@@ -188,9 +201,17 @@ class MainActivity : AppCompatActivity() {
                     prefs.saveSunTimes(weather.sunriseMinutes, weather.sunsetMinutes)
 
                     handler.post {
-                        weatherEmoji.text = weather.emoji
                         weatherTemp.text = "${weather.temperature.toInt()}°"
                         weatherDesc.text = weather.description
+
+                        if (weather.precipitationProb > 0) {
+                            currentRainProb.visibility = View.VISIBLE
+                            currentRainProb.text = "💧 ${weather.precipitationProb}%"
+                        } else {
+                            currentRainProb.visibility = View.GONE
+                        }
+
+                        animatedWeatherIcon.setWeather(weather.emoji, weather.weatherCode, weather.isDay, isNightMode)
                         weatherAnimView.setWeatherState(weather.weatherCode, weather.isDay, isNightMode)
                         renderHourly(weather.hourly, isNightMode)
                     }

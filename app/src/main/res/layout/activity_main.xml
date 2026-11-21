@@ -5,35 +5,34 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- ═══ Main Upper Split: Clock (Left) + Weather (Right) ═══ -->
+    <!-- ═══ Main Content: Upper Area + Bottom 24h Bar ═══ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Top Area: Split Screen (takes most vertical space) -->
+        <!-- Upper Area: Split Screen (Clock | Calendar Divider | Weather) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:orientation="horizontal"
-            android:weightSum="2"
             android:baselineAligned="false">
 
-            <!-- ─── Left Half: Seconds Dial + Large Bold Clock ─── -->
+            <!-- ─── Left: Rectangular Seconds Cadre + Huge Bold Clock ─── -->
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:padding="8dp">
+                android:padding="6dp">
 
-                <!-- 60 Radial Ticks View circling the clock -->
+                <!-- 60 Thick Rectangular Tick Marks encircling left half -->
                 <com.hub.display.SecondsDialView
                     android:id="@+id/secondsDialView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
 
-                <!-- Clock Text Centered Inside Dial -->
+                <!-- Center Clock Text -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -47,44 +46,34 @@
                         android:layout_height="wrap_content"
                         android:text="00:00"
                         android:textColor="#FFFFFF"
-                        android:textSize="110sp"
+                        android:textSize="135sp"
                         android:textStyle="bold"
                         android:fontFamily="sans-serif-medium"
                         android:includeFontPadding="false" />
-
-                    <TextView
-                        android:id="@+id/dateText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text=""
-                        android:textColor="#CCCCCC"
-                        android:textStyle="bold"
-                        android:textSize="20sp" />
                 </LinearLayout>
             </FrameLayout>
 
-            <!-- ─── Center Divider ─── -->
-            <View
-                android:layout_width="1dp"
+            <!-- ─── Center: 8-Box Calendar Strip (Month/Day + 7 Days) ─── -->
+            <com.hub.display.CalendarBarView
+                android:id="@+id/calendarBarView"
+                android:layout_width="52dp"
                 android:layout_height="match_parent"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="20dp"
-                android:background="#222222" />
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp" />
 
-            <!-- ─── Right Half: Weather Dynamic Background + Big Temp ─── -->
+            <!-- ─── Right: Weather Particles + Animated Icon + Huge Temp ─── -->
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1">
 
-                <!-- Dynamic Weather Particle Animation in Background -->
+                <!-- Dynamic Weather Particle Animation -->
                 <com.hub.display.WeatherAnimationView
                     android:id="@+id/weatherAnimView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
 
-                <!-- Foreground Weather Details -->
+                <!-- Weather Foreground Data -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -99,50 +88,69 @@
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
-                        <TextView
-                            android:id="@+id/weatherEmoji"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="70sp" />
+                        <!-- Animated Weather Icon -->
+                        <com.hub.display.AnimatedWeatherIconView
+                            android:id="@+id/animatedWeatherIcon"
+                            android:layout_width="110dp"
+                            android:layout_height="110dp" />
 
+                        <!-- Huge Temperature Matching Clock Size -->
                         <TextView
                             android:id="@+id/weatherTemp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
+                            android:layout_marginStart="8dp"
                             android:text="--°"
                             android:textColor="#FFFFFF"
-                            android:textSize="110sp"
+                            android:textSize="135sp"
                             android:textStyle="bold"
                             android:fontFamily="sans-serif-medium"
                             android:includeFontPadding="false" />
                     </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/weatherDesc"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text=""
-                        android:textColor="#CCCCCC"
-                        android:textStyle="bold"
-                        android:textSize="20sp" />
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/weatherDesc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textColor="#CCCCCC"
+                            android:textStyle="bold"
+                            android:textSize="22sp" />
+
+                        <!-- Main Current Rain Chance % -->
+                        <TextView
+                            android:id="@+id/currentRainProb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:text=""
+                            android:textColor="#4FC3F7"
+                            android:textStyle="bold"
+                            android:textSize="20sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
 
                 </LinearLayout>
             </FrameLayout>
 
         </LinearLayout>
 
-        <!-- ─── Divider between Main and 24h Bar ─── -->
+        <!-- ─── Divider before Bottom Bar ─── -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#1A1A1A" />
+            android:background="#1E1E1E" />
 
-        <!-- ─── Bottom Full-Width 24h Hourly Forecast Bar ─── -->
+        <!-- ─── Bottom 24h Hourly Forecast Bar (Taller 86dp, Full Content Visible) ─── -->
         <HorizontalScrollView
             android:layout_width="match_parent"
-            android:layout_height="64dp"
+            android:layout_height="86dp"
             android:scrollbars="none"
             android:overScrollMode="never"
             android:background="#0A0A0A">
@@ -153,8 +161,8 @@
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp" />
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp" />
         </HorizontalScrollView>
 
     </LinearLayout>

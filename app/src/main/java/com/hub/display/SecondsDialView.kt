@@ -4,13 +4,15 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
 
 /**
- * 60 radial ticks around the clock face representing seconds.
- * Fills up tick-by-tick each second, resets smoothly when 60s completes.
+ * 60 rectangular tick marks arranged along the rectangular border
+ * of the left half of the screen.
+ * - Thickness: Bold (8dp)
+ * - Major ticks: Extra bold (12dp)
+ * - Light up tick-by-tick with each second, reset when 60s completes.
  */
 class SecondsDialView @JvmOverloads constructor(
     context: Context,
@@ -24,12 +26,12 @@ class SecondsDialView @JvmOverloads constructor(
 
     private val activePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeCap = Paint.Cap.ROUND
+        strokeCap = Paint.Cap.SQUARE
     }
 
     private val inactivePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeCap = Paint.Cap.ROUND
+        strokeCap = Paint.Cap.SQUARE
     }
 
     fun setSecond(second: Int) {
@@ -51,33 +53,61 @@ class SecondsDialView @JvmOverloads constructor(
         val h = height.toFloat()
         if (w == 0f || h == 0f) return
 
-        val cx = w / 2f
-        val cy = h / 2f
+        val margin = 16f
+        val left = margin
+        val top = margin
+        val right = w - margin
+        val bottom = h - margin
 
-        // Use rounded rectangle / oval bounds that closely trace the clock text area
-        val outerRadiusX = (w / 2f) - 16f
-        val outerRadiusY = (h / 2f) - 16f
-        val tickLength = 14f
+        val innerMargin = 38f
+        val innerLeft = innerMargin
+        val innerTop = innerMargin
+        val innerRight = w - innerMargin
+        val innerBottom = h - innerMargin
 
         activePaint.color = activeColor
         inactivePaint.color = inactiveColor
 
+        // 60 ticks distributed along rectangle perimeter:
+        // Top: 15 ticks (left to right)
+        // Right: 15 ticks (top to bottom)
+        // Bottom: 15 ticks (right to left)
+        // Left: 15 ticks (bottom to top)
         for (i in 0 until 60) {
-            // Angle in radians: start at 12 o'clock (-90 degrees)
-            val angleDeg = (i * 6f) - 90f
-            val angleRad = Math.toRadians(angleDeg.toDouble())
-            val cos = Math.cos(angleRad).toFloat()
-            val sin = Math.sin(angleRad).toFloat()
+            var x1 = 0f
+            var y1 = 0f
+            var x2 = 0f
+            var y2 = 0f
+
+            when {
+                i < 15 -> { // Top edge
+                    val fraction = i / 15f
+                    val x = left + fraction * (right - left)
+                    x1 = x; y1 = top
+                    x2 = x; y2 = innerTop
+                }
+                i < 30 -> { // Right edge
+                    val fraction = (i - 15) / 15f
+                    val y = top + fraction * (bottom - top)
+                    x1 = right; y1 = y
+                    x2 = innerRight; y2 = y
+                }
+                i < 45 -> { // Bottom edge
+                    val fraction = (i - 30) / 15f
+                    val x = right - fraction * (right - left)
+                    x1 = x; y1 = bottom
+                    x2 = x; y2 = innerBottom
+                }
+                else -> { // Left edge
+                    val fraction = (i - 45) / 15f
+                    val y = bottom - fraction * (bottom - top)
+                    x1 = left; y1 = y
+                    x2 = innerLeft; y2 = y
+                }
+            }
 
             val isMajor = (i % 5 == 0)
-            val len = if (isMajor) tickLength * 1.5f else tickLength
-            val strokeW = if (isMajor) 4f else 2.5f
-
-            val xOuter = cx + outerRadiusX * cos
-            val yOuter = cy + outerRadiusY * sin
-
-            val xInner = cx + (outerRadiusX - len) * cos
-            val yInner = cy + (outerRadiusY - len) * sin
+            val strokeW = if (isMajor) 10f else 6.5f
 
             val paint = if (i <= currentSecond) {
                 activePaint.strokeWidth = strokeW
@@ -87,7 +117,7 @@ class SecondsDialView @JvmOverloads constructor(
                 inactivePaint
             }
 
-            canvas.drawLine(xInner, yInner, xOuter, yOuter, paint)
+            canvas.drawLine(x1, y1, x2, y2, paint)
         }
     }
 }
