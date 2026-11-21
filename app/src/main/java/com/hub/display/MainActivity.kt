@@ -21,6 +21,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var timeText: TextView
     private lateinit var weatherTemp: TextView
+    private lateinit var weatherMinMax: TextView
     private lateinit var weatherDesc: TextView
     private lateinit var rainDropletsContainer: LinearLayout
     private lateinit var rainDropletsView: RainChanceDropletsView
@@ -80,7 +81,7 @@ class MainActivity : AppCompatActivity() {
                 tickerScrollView.visibility = View.VISIBLE
                 tickerScrollX = 0
             }
-            handler.postDelayed(this, 60_000L) // 1 minute toggle
+            handler.postDelayed(this, 60_000L)
         }
     }
 
@@ -110,6 +111,7 @@ class MainActivity : AppCompatActivity() {
 
         timeText = findViewById(R.id.timeText)
         weatherTemp = findViewById(R.id.weatherTemp)
+        weatherMinMax = findViewById(R.id.weatherMinMax)
         weatherDesc = findViewById(R.id.weatherDesc)
         rainDropletsContainer = findViewById(R.id.rainDropletsContainer)
         rainDropletsView = findViewById(R.id.rainDropletsView)
@@ -169,11 +171,9 @@ class MainActivity : AppCompatActivity() {
 
         timeText.text = timeFmt.format(now.time)
 
-        // Seconds rectangular frame update
         val sec = now.get(Calendar.SECOND)
         secondsDialView.setSecond(sec)
 
-        // Center 8-Box Calendar update
         calendarBarView.updateDate(now, isNightMode)
 
         val currentMinutes = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
@@ -191,10 +191,11 @@ class MainActivity : AppCompatActivity() {
         val primary = if (night) Color.parseColor("#E53935") else Color.WHITE
         val secondary = if (night) Color.parseColor("#B71C1C") else Color.parseColor("#CCCCCC")
         val tertiary = if (night) Color.parseColor("#7F0000") else Color.parseColor("#888888")
-        val dialInactive = if (night) Color.parseColor("#330A0A") else Color.parseColor("#383838")
+        val dialInactive = if (night) Color.parseColor("#330A0A") else Color.parseColor("#444444")
 
         timeText.setTextColor(primary)
         weatherTemp.setTextColor(primary)
+        weatherMinMax.setTextColor(secondary)
         weatherDesc.setTextColor(secondary)
         currentRainProbText.setTextColor(if (night) Color.parseColor("#E53935") else Color.parseColor("#29B6F6"))
         newsTickerText.setTextColor(if (night) Color.parseColor("#E53935") else Color.WHITE)
@@ -204,7 +205,7 @@ class MainActivity : AppCompatActivity() {
         calendarBarView.updateDate(Calendar.getInstance(), night)
         lastWeatherData?.let {
             rainDropletsView.setProbability(it.precipitationProb, night)
-            animatedWeatherIcon.setWeather(it.emoji, it.weatherCode, it.isDay, night)
+            animatedWeatherIcon.setWeather(it.weatherCode, it.isDay, night)
             weatherAnimView.setWeatherState(it.weatherCode, it.isDay, night)
         }
         renderHourly(lastHourlyData, night)
@@ -222,13 +223,13 @@ class MainActivity : AppCompatActivity() {
         for (item in hourlyList) {
             val view = inflater.inflate(R.layout.item_hourly_forecast, hourlyContainer, false)
             val tTime = view.findViewById<TextView>(R.id.hourlyTime)
-            val tEmoji = view.findViewById<TextView>(R.id.hourlyEmoji)
+            val vIcon = view.findViewById<AnimatedWeatherIconView>(R.id.hourlyVectorIcon)
             val tTemp = view.findViewById<TextView>(R.id.hourlyTemp)
             val tRain = view.findViewById<TextView>(R.id.hourlyRainProb)
 
             tTime.text = item.time
             tTime.setTextColor(timeColor)
-            tEmoji.text = item.emoji
+            vIcon.setWeather(item.weatherCode, item.isDay, night, compact = true)
             tTemp.text = "${item.temp}°"
             tTemp.setTextColor(tempColor)
 
@@ -250,6 +251,7 @@ class MainActivity : AppCompatActivity() {
 
         if (lat == 0.0 && lon == 0.0) {
             weatherTemp.text = "--°"
+            weatherMinMax.text = ""
             weatherDesc.text = "Tap ⚙ to set location"
             rainDropletsContainer.visibility = View.GONE
             hourlyContainer.removeAllViews()
@@ -265,6 +267,7 @@ class MainActivity : AppCompatActivity() {
 
                     handler.post {
                         weatherTemp.text = "${weather.temperature.toInt()}°"
+                        weatherMinMax.text = "▼ ${weather.minTemp.toInt()}°   ▲ ${weather.maxTemp.toInt()}°"
                         weatherDesc.text = weather.description
 
                         if (weather.precipitationProb > 0) {
@@ -278,6 +281,7 @@ class MainActivity : AppCompatActivity() {
                         // Update News Ticker live marquee text
                         val tickerContent = buildString {
                             append("FEELS LIKE: ${weather.feelsLike.toInt()}°   •   ")
+                            append("TODAY: MIN ${weather.minTemp.toInt()}° / MAX ${weather.maxTemp.toInt()}°   •   ")
                             append("WIND: ${weather.windSpeed.toInt()} km/h   •   ")
                             append("HUMIDITY: ${weather.humidity}%   •   ")
                             append("UV INDEX: ${weather.uvIndex.toInt()}   •   ")
@@ -286,7 +290,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         newsTickerText.text = tickerContent
 
-                        animatedWeatherIcon.setWeather(weather.emoji, weather.weatherCode, weather.isDay, isNightMode)
+                        animatedWeatherIcon.setWeather(weather.weatherCode, weather.isDay, isNightMode)
                         weatherAnimView.setWeatherState(weather.weatherCode, weather.isDay, isNightMode)
                         renderHourly(weather.hourly, isNightMode)
                     }

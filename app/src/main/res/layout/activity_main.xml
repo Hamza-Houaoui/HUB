@@ -19,14 +19,14 @@
             android:orientation="horizontal"
             android:baselineAligned="false">
 
-            <!-- ─── Left: Rectangular Cadre 60 Bold Precision Blocks + Huge Clock ─── -->
+            <!-- ─── Left: Rectangular Cadre 60 Huge Precision Blocks + Huge Clock ─── -->
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:padding="2dp">
 
-                <!-- 60 Extra Bold Hollow/Filled Precision Blocks Starting Top-Center -->
+                <!-- 60 Extra Large Hollow/Filled Precision Blocks -->
                 <com.hub.display.SecondsDialView
                     android:id="@+id/secondsDialView"
                     android:layout_width="match_parent"
@@ -61,7 +61,7 @@
                 android:layout_marginStart="2dp"
                 android:layout_marginEnd="2dp" />
 
-            <!-- ─── Right: Weather Particles + Animated Icon + Huge Temp + 10 Drops ─── -->
+            <!-- ─── Right: Weather Particles + Animated Icon + Huge Temp + Min/Max ─── -->
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -82,6 +82,25 @@
                     android:orientation="vertical"
                     android:padding="4dp">
 
+                    <!-- Min & Max Temperature Tag right above temperature -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/weatherMinMax"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="▼ 9°   ▲ 16°"
+                            android:textColor="#AAAAAA"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:fontFamily="sans-serif-medium" />
+                    </LinearLayout>
+
+                    <!-- Main Icon + Huge Temperature -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

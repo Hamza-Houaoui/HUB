@@ -9,12 +9,15 @@ class WeatherRepository {
     data class HourlyForecast(
         val time: String, // e.g. "02:00"
         val temp: Int,
-        val emoji: String,
+        val weatherCode: Int,
+        val isDay: Boolean,
         val precipitationProb: Int
     )
 
     data class WeatherData(
         val temperature: Double,
+        val minTemp: Double,
+        val maxTemp: Double,
         val feelsLike: Double,
         val description: String,
         val emoji: String,
@@ -30,7 +33,7 @@ class WeatherRepository {
     )
 
     /**
-     * Fetches current weather (with Feels Like, Wind, UV, Humidity, Rain %) and 24h forecast.
+     * Fetches current weather + daily Min/Max + 24h hourly forecast.
      */
     fun getWeather(lat: Double, lon: Double): WeatherData? {
         val urlStr = "https://api.open-meteo.com/v1/forecast?" +
@@ -38,7 +41,7 @@ class WeatherRepository {
                 "&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,weather_code,wind_speed_10m,uv_index,is_day" +
                 "&hourly=temperature_2m,weather_code,is_day,precipitation_probability" +
                 "&forecast_hours=24" +
-                "&daily=sunrise,sunset" +
+                "&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min" +
                 "&timezone=auto&forecast_days=2"
 
         val url = URL(urlStr)
@@ -63,6 +66,8 @@ class WeatherRepository {
             val daily = json.getJSONObject("daily")
             val sunrise = daily.getJSONArray("sunrise").getString(0)
             val sunset = daily.getJSONArray("sunset").getString(0)
+            val maxT = daily.optJSONArray("temperature_2m_max")?.optDouble(0, temp) ?: temp
+            val minT = daily.optJSONArray("temperature_2m_min")?.optDouble(0, temp) ?: temp
 
             val hourlyList = mutableListOf<HourlyForecast>()
             if (json.has("hourly")) {
@@ -81,12 +86,14 @@ class WeatherRepository {
                     val c = codes.getInt(i)
                     val hDay = isDays?.optInt(i, 1) != 0
                     val pProb = precips?.optInt(i, 0) ?: 0
-                    hourlyList.add(HourlyForecast(hourStr, t, codeToEmoji(c, hDay), pProb))
+                    hourlyList.add(HourlyForecast(hourStr, t, c, hDay, pProb))
                 }
             }
 
             WeatherData(
                 temperature = temp,
+                minTemp = minT,
+                maxTemp = maxT,
                 feelsLike = feelsLike,
                 description = codeToDescription(weatherCode),
                 emoji = codeToEmoji(weatherCode, isDay),

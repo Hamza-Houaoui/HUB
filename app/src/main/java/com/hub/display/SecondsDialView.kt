@@ -9,12 +9,13 @@ import android.util.AttributeSet
 import android.view.View
 
 /**
- * 60 Bold Precision Segment Blocks encircling the clock:
+ * 60 Extra Large Precision Blocks encircling the clock:
+ * - Huge & Super Visible from far away:
+ *   - Length: 36dp
+ *   - Thickness: 18dp
+ *   - Stroke width: 3.5dp
  * - Start at exact Top-Center (12 o'clock, tick index 0)
- * - Significantly LARGER & BOLDER:
- *   - Length: 26dp
- *   - Thickness: 13dp
- * - INACTIVE: Sleek hollow outline rectangle with 2.8dp stroke
+ * - INACTIVE: Bold hollow outline rectangle with rounded corners
  * - ACTIVE: Solid luminous filled rectangle
  */
 class SecondsDialView @JvmOverloads constructor(
@@ -25,7 +26,7 @@ class SecondsDialView @JvmOverloads constructor(
 
     private var currentSecond: Int = 0
     private var activeColor: Int = Color.WHITE
-    private var inactiveOutlineColor: Int = Color.parseColor("#383838")
+    private var inactiveOutlineColor: Int = Color.parseColor("#444444")
 
     private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
@@ -33,7 +34,7 @@ class SecondsDialView @JvmOverloads constructor(
 
     private val strokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeWidth = 2.8f
+        strokeWidth = 3.5f
     }
 
     fun setSecond(second: Int) {
@@ -55,16 +56,16 @@ class SecondsDialView @JvmOverloads constructor(
         val h = height.toFloat()
         if (w == 0f || h == 0f) return
 
-        val margin = 14f
+        val margin = 12f
         val left = margin
         val top = margin
         val right = w - margin
         val bottom = h - margin
 
-        // Larger, more prominent dimensions
-        val segLength = 25f
-        val segThick = 12.5f
-        val corner = 3f
+        // Extra large dimensions
+        val segLength = 36f
+        val segThick = 18f
+        val corner = 4f
 
         fillPaint.color = activeColor
         strokePaint.color = inactiveOutlineColor

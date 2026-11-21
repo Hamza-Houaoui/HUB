@@ -20,15 +20,12 @@
         android:fontFamily="sans-serif-medium"
         android:includeFontPadding="false" />
 
-    <!-- Emoji / Icon -->
-    <TextView
-        android:id="@+id/hourlyEmoji"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="1dp"
-        android:text="☀️"
-        android:textSize="18sp"
-        android:includeFontPadding="false" />
+    <!-- Vector Icon matching Main Weather Icon design -->
+    <com.hub.display.AnimatedWeatherIconView
+        android:id="@+id/hourlyVectorIcon"
+        android:layout_width="26dp"
+        android:layout_height="22dp"
+        android:layout_marginTop="1dp" />
 
     <!-- Temp + Rain in compact row -->
     <LinearLayout
