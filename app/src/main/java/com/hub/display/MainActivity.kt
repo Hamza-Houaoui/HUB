@@ -19,7 +19,7 @@ import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var timeText: TextView
+    private lateinit var autoClockView: AutoScaleClockView
     private lateinit var weatherTemp: TextView
     private lateinit var weatherMinMax: TextView
     private lateinit var weatherDesc: TextView
@@ -69,7 +69,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Alternates Bottom Bar every 1 minute between 24h Hourly & Live News Ticker
     private val bottomBarToggleRunnable = object : Runnable {
         override fun run() {
             isShowingHourly = !isShowingHourly
@@ -85,7 +84,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Smooth Marquee News Ticker scroll
     private val marqueeRunnable = object : Runnable {
         override fun run() {
             if (!isShowingHourly && tickerScrollView.visibility == View.VISIBLE) {
@@ -109,7 +107,7 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
-        timeText = findViewById(R.id.timeText)
+        autoClockView = findViewById(R.id.autoClockView)
         weatherTemp = findViewById(R.id.weatherTemp)
         weatherMinMax = findViewById(R.id.weatherMinMax)
         weatherDesc = findViewById(R.id.weatherDesc)
@@ -169,7 +167,7 @@ class MainActivity : AppCompatActivity() {
         val now = Calendar.getInstance()
         val timeFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
 
-        timeText.text = timeFmt.format(now.time)
+        autoClockView.setTime(timeFmt.format(now.time))
 
         val sec = now.get(Calendar.SECOND)
         secondsDialView.setSecond(sec)
@@ -193,7 +191,7 @@ class MainActivity : AppCompatActivity() {
         val tertiary = if (night) Color.parseColor("#7F0000") else Color.parseColor("#888888")
         val dialInactive = if (night) Color.parseColor("#330A0A") else Color.parseColor("#444444")
 
-        timeText.setTextColor(primary)
+        autoClockView.setClockColor(primary)
         weatherTemp.setTextColor(primary)
         weatherMinMax.setTextColor(secondary)
         weatherDesc.setTextColor(secondary)
@@ -278,7 +276,6 @@ class MainActivity : AppCompatActivity() {
                             rainDropletsContainer.visibility = View.GONE
                         }
 
-                        // Update News Ticker live marquee text
                         val tickerContent = buildString {
                             append("FEELS LIKE: ${weather.feelsLike.toInt()}°   •   ")
                             append("TODAY: MIN ${weather.minTemp.toInt()}° / MAX ${weather.maxTemp.toInt()}°   •   ")

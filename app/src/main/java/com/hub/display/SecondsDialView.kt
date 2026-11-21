@@ -10,9 +10,8 @@ import android.view.View
 
 /**
  * 60 Precision Segment Blocks encircling the clock:
- * Dynamically scales its dimensions to fit any screen size (from 5.0" Galaxy J5 to large A21s):
- * - Margin & dimensions computed from width & height.
- * - Single-line text safe area inside.
+ * Pushed right to the very outer edges (4px margin) to liberate MAXIMUM interior area!
+ * Active: Solid filled. Inactive: Hollow outline.
  */
 class SecondsDialView @JvmOverloads constructor(
     context: Context,
@@ -30,7 +29,7 @@ class SecondsDialView @JvmOverloads constructor(
 
     private val strokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeWidth = 2.5f
+        strokeWidth = 2.4f
     }
 
     fun setSecond(second: Int) {
@@ -52,15 +51,15 @@ class SecondsDialView @JvmOverloads constructor(
         val h = height.toFloat()
         if (w == 0f || h == 0f) return
 
-        val margin = 8f
+        // Minimal margin to hug the exact outer perimeter
+        val margin = 5f
         val left = margin
         val top = margin
         val right = w - margin
         val bottom = h - margin
 
-        // Dynamic responsive segment size based on canvas width
-        val segLength = (w / 16f) * 0.72f
-        val segThick = 10f
+        val segLength = (w / 16f) * 0.78f
+        val segThick = 9f
         val corner = 2.5f
 
         fillPaint.color = activeColor

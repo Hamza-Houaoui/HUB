@@ -19,41 +19,24 @@
             android:orientation="horizontal"
             android:baselineAligned="false">
 
-            <!-- ─── Left: Rectangular Cadre 60 Precision Blocks + Auto-fitting Clock ─── -->
+            <!-- ─── Left: Clock Fills 100% of Space Edge-to-Edge ─── -->
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1">
 
-                <!-- 60 Responsive Precision Blocks -->
+                <!-- 60 Responsive Precision Blocks Outer Border -->
                 <com.hub.display.SecondsDialView
                     android:id="@+id/secondsDialView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
 
-                <!-- Center Clock Text: Single line guaranteed! -->
-                <LinearLayout
+                <!-- Auto-Scaling Clock Text Fills Width from Border to Border! -->
+                <com.hub.display.AutoScaleClockView
+                    android:id="@+id/autoClockView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="24dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/timeText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="00:00"
-                        android:textColor="#FFFFFF"
-                        android:textSize="72sp"
-                        android:maxLines="1"
-                        android:singleLine="true"
-                        android:ellipsize="none"
-                        android:textStyle="bold"
-                        android:fontFamily="sans-serif-medium"
-                        android:includeFontPadding="false" />
-                </LinearLayout>
+                    android:layout_margin="14dp" />
             </FrameLayout>
 
             <!-- ─── Center: Slim Seamless Edge-to-Edge 8-Box Calendar Strip ─── -->
@@ -81,8 +64,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
-                    android:paddingStart="6dp"
-                    android:paddingEnd="6dp"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
                     android:orientation="vertical">
 
                     <!-- Min & Max Temperature Tag right above temperature -->
@@ -93,10 +76,10 @@
                         android:text="▼ 9°   ▲ 16°"
                         android:textColor="#AAAAAA"
                         android:textStyle="bold"
-                        android:textSize="13sp"
+                        android:textSize="14sp"
                         android:fontFamily="sans-serif-medium" />
 
-                    <!-- Main Icon + Temperature on one tight, no-wrap horizontal row -->
+                    <!-- Main Icon + Temperature on one tight, bold horizontal row -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -107,10 +90,10 @@
                         <!-- Custom Vector Animated Weather Icon -->
                         <com.hub.display.AnimatedWeatherIconView
                             android:id="@+id/animatedWeatherIcon"
-                            android:layout_width="65dp"
-                            android:layout_height="65dp" />
+                            android:layout_width="78dp"
+                            android:layout_height="78dp" />
 
-                        <!-- Single-line guaranteed Temperature with degree symbol attached -->
+                        <!-- Large prominent Temperature with attached degree symbol -->
                         <TextView
                             android:id="@+id/weatherTemp"
                             android:layout_width="wrap_content"
@@ -118,7 +101,7 @@
                             android:layout_marginStart="4dp"
                             android:text="--°"
                             android:textColor="#FFFFFF"
-                            android:textSize="72sp"
+                            android:textSize="88sp"
                             android:maxLines="1"
                             android:singleLine="true"
                             android:ellipsize="none"
@@ -142,7 +125,7 @@
                             android:text=""
                             android:textColor="#CCCCCC"
                             android:textStyle="bold"
-                            android:textSize="15sp" />
+                            android:textSize="16sp" />
 
                         <!-- 10 Droplets Scale for Rain % -->
                         <LinearLayout
