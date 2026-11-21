@@ -10,16 +10,19 @@ class WeatherRepository {
         val time: String, // e.g. "02:00"
         val temp: Int,
         val emoji: String,
-        val precipitationProb: Int // Chance of rain %
+        val precipitationProb: Int
     )
 
     data class WeatherData(
         val temperature: Double,
+        val feelsLike: Double,
         val description: String,
         val emoji: String,
         val weatherCode: Int,
         val isDay: Boolean,
         val humidity: Int,
+        val windSpeed: Double,
+        val uvIndex: Double,
         val precipitationProb: Int,
         val sunriseMinutes: Int,
         val sunsetMinutes: Int,
@@ -27,12 +30,12 @@ class WeatherRepository {
     )
 
     /**
-     * Fetches weather data including precipitation probability % and hourly forecast.
+     * Fetches current weather (with Feels Like, Wind, UV, Humidity, Rain %) and 24h forecast.
      */
     fun getWeather(lat: Double, lon: Double): WeatherData? {
         val urlStr = "https://api.open-meteo.com/v1/forecast?" +
                 "latitude=$lat&longitude=$lon" +
-                "&current=temperature_2m,relative_humidity_2m,weather_code,is_day,precipitation_probability" +
+                "&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,weather_code,wind_speed_10m,uv_index,is_day" +
                 "&hourly=temperature_2m,weather_code,is_day,precipitation_probability" +
                 "&forecast_hours=24" +
                 "&daily=sunrise,sunset" +
@@ -49,10 +52,13 @@ class WeatherRepository {
 
             val current = json.getJSONObject("current")
             val temp = current.getDouble("temperature_2m")
+            val feelsLike = current.optDouble("apparent_temperature", temp)
             val humidity = current.getInt("relative_humidity_2m")
             val weatherCode = current.getInt("weather_code")
             val isDay = current.optInt("is_day", 1) == 1
             val currentPrecip = current.optInt("precipitation_probability", 0)
+            val windSpeed = current.optDouble("wind_speed_10m", 0.0)
+            val uvIndex = current.optDouble("uv_index", 0.0)
 
             val daily = json.getJSONObject("daily")
             val sunrise = daily.getJSONArray("sunrise").getString(0)
@@ -81,11 +87,14 @@ class WeatherRepository {
 
             WeatherData(
                 temperature = temp,
+                feelsLike = feelsLike,
                 description = codeToDescription(weatherCode),
                 emoji = codeToEmoji(weatherCode, isDay),
                 weatherCode = weatherCode,
                 isDay = isDay,
                 humidity = humidity,
+                windSpeed = windSpeed,
+                uvIndex = uvIndex,
                 precipitationProb = currentPrecip,
                 sunriseMinutes = parseTimeToMinutes(sunrise),
                 sunsetMinutes = parseTimeToMinutes(sunset),

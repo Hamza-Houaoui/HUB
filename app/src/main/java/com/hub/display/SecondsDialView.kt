@@ -9,11 +9,13 @@ import android.util.AttributeSet
 import android.view.View
 
 /**
- * 60 Elegant Precision Segment Blocks encircling the clock:
+ * 60 Bold Precision Segment Blocks encircling the clock:
  * - Start at exact Top-Center (12 o'clock, tick index 0)
- * - Proceeds clockwise: Top-Center -> Top-Right -> Right -> Bottom -> Left -> Top-Left
- * - INACTIVE: Sleek hollow outline rectangle with subtle rounded corners
- * - ACTIVE: Solid filled luminous rectangle
+ * - Significantly LARGER & BOLDER:
+ *   - Length: 26dp
+ *   - Thickness: 13dp
+ * - INACTIVE: Sleek hollow outline rectangle with 2.8dp stroke
+ * - ACTIVE: Solid luminous filled rectangle
  */
 class SecondsDialView @JvmOverloads constructor(
     context: Context,
@@ -23,7 +25,7 @@ class SecondsDialView @JvmOverloads constructor(
 
     private var currentSecond: Int = 0
     private var activeColor: Int = Color.WHITE
-    private var inactiveOutlineColor: Int = Color.parseColor("#333333")
+    private var inactiveOutlineColor: Int = Color.parseColor("#383838")
 
     private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
@@ -31,7 +33,7 @@ class SecondsDialView @JvmOverloads constructor(
 
     private val strokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeWidth = 2.2f
+        strokeWidth = 2.8f
     }
 
     fun setSecond(second: Int) {
@@ -53,65 +55,58 @@ class SecondsDialView @JvmOverloads constructor(
         val h = height.toFloat()
         if (w == 0f || h == 0f) return
 
-        val margin = 12f
+        val margin = 14f
         val left = margin
         val top = margin
         val right = w - margin
         val bottom = h - margin
 
-        val segLength = 18f
-        val segThick = 9f
-        val corner = 2.5f
+        // Larger, more prominent dimensions
+        val segLength = 25f
+        val segThick = 12.5f
+        val corner = 3f
 
         fillPaint.color = activeColor
         strokePaint.color = inactiveOutlineColor
-
-        // 60 segments:
-        // Top edge: 16 segments (starts at center: index 0 is at middle top, runs to right, then indices 53..59 come from left)
-        // Right edge: 14 segments
-        // Bottom edge: 16 segments
-        // Left edge: 14 segments
-        // Total = 16 + 14 + 16 + 14 = 60 segments!
 
         val numTop = 16
         val numRight = 14
         val numBottom = 16
         val numLeft = 14
-
         val halfTop = numTop / 2 // 8
 
         for (i in 0 until 60) {
             val rect: RectF
 
             when {
-                // Top Right (from center x to right): indices 0..7 (8 segments)
+                // Top Right: indices 0..7
                 i < halfTop -> {
                     val step = (right - (left + right) / 2f) / halfTop
                     val cx = ((left + right) / 2f) + (i * step) + (step / 2f)
                     rect = RectF(cx - (segLength / 2f), top, cx + (segLength / 2f), top + segThick)
                 }
-                // Right Edge: indices 8..21 (14 segments, top to bottom)
+                // Right Edge: indices 8..21
                 i < halfTop + numRight -> {
                     val rIdx = i - halfTop
                     val step = (bottom - top) / numRight
                     val cy = top + (rIdx * step) + (step / 2f)
                     rect = RectF(right - segThick, cy - (segLength / 2f), right, cy + (segLength / 2f))
                 }
-                // Bottom Edge: indices 22..37 (16 segments, right to left)
+                // Bottom Edge: indices 22..37
                 i < halfTop + numRight + numBottom -> {
                     val bIdx = i - (halfTop + numRight)
                     val step = (right - left) / numBottom
                     val cx = right - (bIdx * step) - (step / 2f)
                     rect = RectF(cx - (segLength / 2f), bottom - segThick, cx + (segLength / 2f), bottom)
                 }
-                // Left Edge: indices 38..51 (14 segments, bottom to top)
+                // Left Edge: indices 38..51
                 i < halfTop + numRight + numBottom + numLeft -> {
                     val lIdx = i - (halfTop + numRight + numBottom)
                     val step = (bottom - top) / numLeft
                     val cy = bottom - (lIdx * step) - (step / 2f)
                     rect = RectF(left, cy - (segLength / 2f), left + segThick, cy + (segLength / 2f))
                 }
-                // Top Left: indices 52..59 (8 segments, left to center)
+                // Top Left: indices 52..59
                 else -> {
                     val tlIdx = i - (halfTop + numRight + numBottom + numLeft)
                     val step = (((left + right) / 2f) - left) / halfTop
@@ -121,10 +116,8 @@ class SecondsDialView @JvmOverloads constructor(
             }
 
             if (i <= currentSecond) {
-                // ACTIVE: Solid filled with subtle glow
                 canvas.drawRoundRect(rect, corner, corner, fillPaint)
             } else {
-                // INACTIVE: Sleek hollow precision border
                 canvas.drawRoundRect(rect, corner, corner, strokePaint)
             }
         }

@@ -19,14 +19,14 @@
             android:orientation="horizontal"
             android:baselineAligned="false">
 
-            <!-- ─── Left: Rectangular Cadre 60 Precision Blocks + Huge Clock ─── -->
+            <!-- ─── Left: Rectangular Cadre 60 Bold Precision Blocks + Huge Clock ─── -->
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:padding="4dp">
+                android:padding="2dp">
 
-                <!-- 60 Thick Hollow/Filled Precision Blocks Starting Top-Center -->
+                <!-- 60 Extra Bold Hollow/Filled Precision Blocks Starting Top-Center -->
                 <com.hub.display.SecondsDialView
                     android:id="@+id/secondsDialView"
                     android:layout_width="match_parent"
@@ -61,7 +61,7 @@
                 android:layout_marginStart="2dp"
                 android:layout_marginEnd="2dp" />
 
-            <!-- ─── Right: Weather Particles + Animated Icon + Huge Temp ─── -->
+            <!-- ─── Right: Weather Particles + Animated Icon + Huge Temp + 10 Drops ─── -->
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -80,7 +80,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="6dp">
+                    android:padding="4dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -88,18 +88,18 @@
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
-                        <!-- Animated Weather Icon -->
+                        <!-- Custom Vector Animated Weather Icon -->
                         <com.hub.display.AnimatedWeatherIconView
                             android:id="@+id/animatedWeatherIcon"
-                            android:layout_width="105dp"
-                            android:layout_height="105dp" />
+                            android:layout_width="110dp"
+                            android:layout_height="110dp" />
 
                         <!-- Huge Temperature Matching Clock Size -->
                         <TextView
                             android:id="@+id/weatherTemp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="6dp"
+                            android:layout_marginStart="4dp"
                             android:text="--°"
                             android:textColor="#FFFFFF"
                             android:textSize="135sp"
@@ -108,10 +108,11 @@
                             android:includeFontPadding="false" />
                     </LinearLayout>
 
+                    <!-- Condition Description + 10-Droplets Rain Scale -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="center"
+                        android:gravity="center_vertical"
                         android:orientation="horizontal">
 
                         <TextView
@@ -123,17 +124,32 @@
                             android:textStyle="bold"
                             android:textSize="20sp" />
 
-                        <!-- Main Current Rain Chance % -->
-                        <TextView
-                            android:id="@+id/currentRainProb"
+                        <!-- 10 Droplets Scale for Rain % -->
+                        <LinearLayout
+                            android:id="@+id/rainDropletsContainer"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:text=""
-                            android:textColor="#4FC3F7"
-                            android:textStyle="bold"
-                            android:textSize="18sp"
-                            android:visibility="gone" />
+                            android:layout_marginStart="14dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:visibility="gone">
+
+                            <com.hub.display.RainChanceDropletsView
+                                android:id="@+id/rainDropletsView"
+                                android:layout_width="85dp"
+                                android:layout_height="18dp" />
+
+                            <TextView
+                                android:id="@+id/currentRainProbText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:text="30%"
+                                android:textColor="#29B6F6"
+                                android:textStyle="bold"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+
                     </LinearLayout>
 
                 </LinearLayout>
@@ -147,23 +163,54 @@
             android:layout_height="1dp"
             android:background="#161616" />
 
-        <!-- ─── Compact Sleek 24h Hourly Forecast Bar (54dp only, Clean & Sharp) ─── -->
-        <HorizontalScrollView
+        <!-- ─── Dynamic Bottom Bar (Alternates every 1 min: 24h Hourly <-> Live News Ticker) ─── -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:scrollbars="none"
-            android:overScrollMode="never"
+            android:layout_height="52dp"
             android:background="#070707">
 
-            <LinearLayout
-                android:id="@+id/hourlyContainer"
-                android:layout_width="wrap_content"
+            <!-- View 1: 24h Hourly Forecast -->
+            <HorizontalScrollView
+                android:id="@+id/hourlyScrollView"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingStart="6dp"
-                android:paddingEnd="6dp" />
-        </HorizontalScrollView>
+                android:scrollbars="none"
+                android:overScrollMode="never">
+
+                <LinearLayout
+                    android:id="@+id/hourlyContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp" />
+            </HorizontalScrollView>
+
+            <!-- View 2: Live Marquee News Ticker Bar (Feels like, Wind, Humidity, UV...) -->
+            <HorizontalScrollView
+                android:id="@+id/tickerScrollView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="none"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/newsTickerText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:singleLine="true"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="FEELS LIKE: --°   •   WIND: -- km/h   •   HUMIDITY: --%   •   UV INDEX: --   •   RAIN CHANCE: --%" />
+            </HorizontalScrollView>
+
+        </FrameLayout>
 
     </LinearLayout>
 
