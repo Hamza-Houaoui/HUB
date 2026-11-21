@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="night_primary">#FFCC2200</color>
+    <color name="night_secondary">#FF882200</color>
+    <color name="night_tertiary">#FF661100</color>
+    <color name="text_secondary">#FFBBBBBB</color>
+    <color name="text_tertiary">#FF888888</color>
+    <color name="divider">#FF222222</color>
+</resources>
